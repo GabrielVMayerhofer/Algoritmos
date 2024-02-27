@@ -22,39 +22,36 @@ public:
       this->vertices = vertices;
       distance = new int[vertices];
       visited = new int[vertices];
-      parent = new int[vertices];
   }
   ~Graph(){
     delete[] distance;
     delete[] visited;
   }
 
-  void dijkstra(long int start){
+  void prim(){
     for(long int i = 0; i < vertices; i++){
       visited[i] = 0;
       distance[i] = INT_MAX;
-      parent[i] = -1;
     }
-    distance[start] = 0;
+
+    distance[0] = 0;
         
     priority_queue<pair<int,pair<int,int>>,vector<pair<int,pair<int,int>>>, greater<pair<int, pair<int,int>>>> heap;
-    int v = start, p;
-    heap.push(make_pair(0, make_pair(start, start)));
+    heap.push(make_pair(0, make_pair(0, 0)));
 
+    int v;
     for(int i = 0; i < vertices; i++){
       do{
         if(heap.empty())
           return;
-        p = heap.top().second.first;
         v = heap.top().second.second;
         heap.pop();
       } while(visited[v]);
       visited[v] = 1;
-      parent[v] = p;
 
       for(auto w : adjList[v]){
-        if(!visited[w.destino] && distance[w.destino] > distance[v] + w.weight){
-          distance[w.destino] = distance[v] + w.weight;
+        if(!visited[w.destino] && distance[w.destino] > w.weight){
+          distance[w.destino] = w.weight;
           heap.push(make_pair(distance[w.destino], make_pair(v, w.destino)));
         }
       }
@@ -64,17 +61,14 @@ public:
 
 
 int main(){
-  int casos;
-  cin >> casos;
-  int k = 1;
-
-  for(int i = 0; i < casos; i++){
-    long int n, ops, origemFind, destinoFind;
-    cin >> n >> ops >> origemFind >> destinoFind;
-
+  while(1){
+    int n, m;
+    cin >> n >> m;
+    if(n == 0 && m == 0)  return 0;
+    
     Graph g(n);
     g.adjList.resize(n);
-    for(long int j = 0; j < ops; j++){
+    for(long int i = 0; i < m; i++){
       long int origem, destino, weight;
       cin >> origem >> destino >> weight;
 
@@ -86,11 +80,15 @@ int main(){
       g.adjList[destino].push_back(add);
     }
 
-    g.dijkstra(origemFind);
-    if(g.distance[destinoFind] == INT_MAX)
-      cout << "Case #" << k << ": unreachable" << "\n";
+    g.prim();
+    int maior = 0;
+    for(int i = 0; i < n; i++)
+      if(g.distance[i] > maior)
+        maior = g.distance[i];
+    if(maior == INT_MAX)
+      cout << "IMPOSSIBLE\n";
     else
-      cout << "Case #" << k << ": " << g.distance[destinoFind] << "\n";
-    k++;
+      cout << maior << "\n";
   }
+
 }
